@@ -119,5 +119,5 @@ STATIC_URL = 'static/'
 
 
 LOGIN_REDIRECT_URL = '/contabilidad/diario/' 
-LOGOUT_REDIRECT_URL = 'login'              
 LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'sesion_cerrada'

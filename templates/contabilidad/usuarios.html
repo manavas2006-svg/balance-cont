@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+{% block page_title %}Administración de Personal Contable{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+        <div class="flex items-center gap-2.5 mb-5">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold text-slate-800">Añadir Nuevo Miembro al Personal</h3>
+                <p class="text-[11px] text-slate-400">Asigna las credenciales profesionales y la cédula de identidad del nuevo usuario.</p>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="crear">
+            
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre</label>
+                    <input type="text" name="nombre" required placeholder="Ej: Angel" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Apellido</label>
+                    <input type="text" name="apellido" required placeholder="Ej: Freites" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cédula (V-00000000)</label>
+                    <input type="text" name="cedula" required placeholder="Ej: V-26123456" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Usuario / ID Acceso</label>
+                    <input type="text" name="username" required placeholder="Ej: afreites" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Correo Electrónico</label>
+                    <input type="email" name="email" required placeholder="empleado@empresa.com" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-700 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                <div class="w-64">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Rol y Permisos Contables</label>
+                    <select name="rol" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-slate-600 focus:outline-none focus:border-indigo-500">
+                        <option value="AUDITOR">Auditor Interno (Solo Lectura)</option>
+                        <option value="CONTADOR" selected>Contador (Libros y Catálogos)</option>
+                        <option value="ADMIN">Administrador (Control Total)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm flex items-center gap-1.5 self-end">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Registrar en Empresa</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="text-xs font-bold text-slate-800">Nómina Contable Registrada</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Lista de usuarios activos con acceso regulado a los estados financieros de la entidad.</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50/30 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="p-4">Personal</th>
+                        <th class="p-4">Cédula</th>
+                        <th class="p-4">Usuario Acceso</th>
+                        <th class="p-4">Correo</th>
+                        <th class="p-4">Rol Asignado</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-600">
+                    {% for u in usuarios %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-4 font-bold text-slate-700">
+                            {{ u.first_name }} {{ u.last_name }}
+                        </td>
+                        <td class="p-4 text-slate-500 font-mono">
+                            {{ u.perfil.cedula }}
+                        </td>
+                        <td class="p-4 text-slate-500">
+                            {{ u.username }}
+                        </td>
+                        <td class="p-4 text-slate-400">
+                            {{ u.email }}
+                        </td>
+                        <td class="p-4">
+                            {% if u.is_superuser %}
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100">Admin</span>
+                            {% elif u.is_staff %}
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100">Contador</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-50 text-amber-600 border border-amber-100">Auditor</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-center">
+                            <form method="POST" onsubmit="return confirm('¿Remover por completo a {{ u.first_name }} del sistema de la empresa?');" class="inline-block">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="eliminar">
+                                <input type="hidden" name="usuario_id" value="{{ u.id }}">
+                                <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer">
+                                    <i data-lucide="user-x" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-xs text-slate-400 font-medium">
+                            No hay otros operadores registrados en el sistema.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

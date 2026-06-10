@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión — Systemic Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="h-full font-sans text-slate-900 antialiased flex items-center justify-center p-4">
+
+    <div class="w-full max-w-sm bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+        
+        <div class="text-center space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-200 mx-auto">
+                <i data-lucide="lock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold tracking-tight text-slate-800">Systemic Ledger</h2>
+                <p class="text-xs text-slate-400">Introduce tus credenciales de informática para acceder</p>
+            </div>
+        </div>
+
+        {% if form.errors %}
+            <div class="p-3.5 rounded-lg bg-rose-50 border border-rose-100 text-xs font-medium text-rose-700 flex items-center gap-2.5">
+                <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                <span>Usuario o contraseña incorrectos. Inténtalo de nuevo.</span>
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Usuario</label>
+                <div class="relative">
+                    <input type="text" name="username" placeholder="ej. manuel" class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder-slate-400" required>
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contraseña</label>
+                </div>
+                <div class="relative">
+                    <input type="password" name="password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder-slate-400" required>
+                    <i data-lucide="key-round" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors tracking-wide mt-2">
+                Entrar al Sistema
+            </button>
+        </form>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

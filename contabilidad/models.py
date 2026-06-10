@@ -74,7 +74,7 @@ def clean(self):
         while comprobacion_padre is not None:
             if comprobacion_padre == self:
                 raise ValidationError(
-                    f"Ciclo infinito detectado. La cuenta '{self.nombre}' "
+                    f"La cuenta '{self.nombre}' "
                     f"no puede tener como ancestro a una de sus propias cuentas hijas."
                 )
             comprobacion_padre = comprobacion_padre.padre
@@ -95,7 +95,7 @@ class AsientoCabecera(models.Model):
 
     def clean(self):
         """
-        El Guardián del Balance: Valida las reglas de la partida doble 
+        Valida las reglas de la partida doble 
         antes de que el asiento se guarde en la base de datos.
         """
         super().clean()
@@ -109,7 +109,7 @@ class AsientoCabecera(models.Model):
                 # Debe es igual a Haber
                 if total_debe != total_haber:
                     raise ValidationError(
-                        f"¡Asiento Descuadrado! El total del Debe ({total_debe}) "
+                        f"El total del Debe ({total_debe}) "
                         f"debe ser igual al total del Haber ({total_haber}). "
                         f"Diferencia: {abs(total_debe - total_haber)}"
                     )
@@ -140,7 +140,7 @@ class AsientoDetalle(models.Model):
 
     def clean(self):
         """
-        Validación a nivel de línea: No permite registrar transacciones
+        Validación a nivel de línea No permite registrar transacciones
         en cuentas que tengan hijos (cuentas que no sean detalle).
         """
         super().clean()

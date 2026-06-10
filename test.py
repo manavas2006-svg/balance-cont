@@ -13,7 +13,7 @@ from decimal import Decimal
 
 def generar_balance_comprobacion():
     print("\n" + "="*60)
-    print("        REPORTE: BALANCE DE COMPROBACIÓN RECURSIVO")
+    print("        BALANCE DE COMPROBACIÓN RECURSIVO")
     print("="*60)
     print(f"{'CÓDIGO':<15} | {'NOMBRE DE LA CUENTA':<30} | {'SALDO':>10}")
     print("-"*60)

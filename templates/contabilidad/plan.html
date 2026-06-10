@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Plan de Cuentas — Systemic Ledger{% endblock %}
+{% block section_name %}Plan de Cuentas{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+    
+    {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="p-4 rounded-xl text-sm font-medium border flex items-center gap-3 {% if message.tags == 'error' %} bg-rose-50 border-rose-100 text-rose-700 {% else %} bg-emerald-50 border-emerald-100 text-emerald-700 {% endif %}">
+                    <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle-2{% endif %}" class="w-4 h-4 shrink-0"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <div class="mb-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="folder-plus" class="w-4 h-4 text-indigo-600"></i>
+                Estructurar Nueva Cuenta
+            </h3>
+            <p class="text-xs text-slate-400">Agrega subgrupos o cuentas de detalle respetando la codificación numérica jerárquica.</p>
+        </div>
+
+        <form method="POST" action="{% url 'plan_cuentas' %}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            {% csrf_token %}
+            
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Código</label>
+                <input type="text" name="codigo" placeholder="Ej. 1.1.01" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" required>
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre de Cuenta</label>
+                <input type="text" name="nombre" placeholder="Ej. Caja Chica" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:outline-none focus:border-indigo-500 focus:bg-white transition-all" required>
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cuenta Padre (Opcional)</label>
+                <select name="padre" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white">
+                    <option value="">-- Ninguna (Raíz) --</option>
+                    {% for c in cuentas_raiz %}
+                        <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tipo</label>
+                <select name="tipo" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white">
+                    <option value="ACT">Activo</option>
+                    <option value="PAS">Pasivo</option>
+                    <option value="PAT">Patrimonio</option>
+                    <option value="ING">Ingresos</option>
+                    <option value="EGR">Egresos</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Naturaleza</label>
+                <select name="naturaleza" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white">
+                    <option value="DEU">Deudora</option>
+                    <option value="ACR">Acreedora</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-12 flex justify-end pt-2">
+                <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Registrar Cuenta
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span>Código y Nombre de la Cuenta</span>
+            <div class="flex gap-16 mr-8">
+                <span>Tipo</span>
+                <span class="w-16 text-right">Naturaleza</span>
+            </div>
+        </div>
+
+        <div class="divide-y divide-slate-100 px-6 py-2">
+            {% for cuenta in cuentas_raiz %}
+                <div class="py-3 flex justify-between items-center group transition-colors hover:bg-slate-50/40">
+                    <div class="flex items-center gap-2">
+                        
+                        {% if cuenta.padre %}
+                            <span class="text-slate-300 font-mono text-xs select-none pl-4">└─</span>
+                        {% endif %}
+                        
+                        <span class="font-mono text-xs font-bold {% if cuenta.padre %}text-slate-500{% else %}text-slate-900{% endif %}">
+                            {{ cuenta.codigo }}
+                        </span>
+                        <span class="text-sm {% if not cuenta.padre %}font-semibold text-slate-800{% else %}text-slate-600{% endif %}">
+                            {{ cuenta.nombre }}
+                        </span>
+
+                        {% if not cuenta.hijos.exists %}
+                            <span class="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded border border-emerald-100 uppercase tracking-wider scale-90">Detalle</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex gap-16 items-center text-xs font-medium mr-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
+                            {{ cuenta.get_tipo_display }}
+                        </span>
+                        <span class="w-16 text-right {% if cuenta.naturaleza == 'DEU' %}text-indigo-600{% else %}text-amber-600{% endif %}">
+                            {{ cuenta.get_naturaleza_display }}
+                        </span>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center py-12 text-xs text-slate-400 font-medium">
+                    <i data-lucide="folder-tree" class="w-8 h-8 mx-auto stroke-1 mb-2 text-slate-300"></i>
+                    No se han registrado cuentas en el sistema.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

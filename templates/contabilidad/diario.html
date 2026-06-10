@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Libro Diario — Systemic Ledger{% endblock %}
+{% block section_name %}Libro Diario{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for message in messages %}
+                <div class="p-4 rounded-xl text-sm font-medium border flex items-center gap-3 {% if message.tags == 'error' %} bg-rose-50 border-rose-100 text-rose-700 {% else %} bg-emerald-50 border-emerald-100 text-emerald-700 {% endif %}">
+                    <i data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle-2{% endif %}" class="w-4 h-4 shrink-0"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <form method="POST" action="{% url 'libro_diario' %}" class="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
+            {% csrf_token %}
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Registrar Operación</h3>
+                <p class="text-xs text-slate-400">Ingresa asientos respetando rigurosamente la partida doble.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Fecha Efectiva</label>
+                    <input type="date" name="fecha" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all font-medium" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Descripción / Concepto</label>
+                    <textarea name="descripcion" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all placeholder-slate-400" placeholder="Ej. Aporte inicial de capital..." required></textarea>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-4">
+                <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Líneas de Asiento</span>
+                
+                <div id="contenedor-filas" class="space-y-2">
+                    <div class="grid grid-cols-12 gap-2 align-items-center fila-movimiento">
+                        <div class="col-span-6">
+                            <select name="cuenta[]" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white" required>
+                                <option value="">-- Cuenta --</option>
+                                {% for cuenta in cuentas %}
+                                <option value="{{ cuenta.id }}">{{ cuenta.codigo }} - {{ cuenta.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" name="debit[]" placeholder="Debe" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-mono text-right focus:outline-none focus:border-indigo-500 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" name="credit[]" placeholder="Haber" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-mono text-right focus:outline-none focus:border-indigo-500 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-2 align-items-center fila-movimiento">
+                        <div class="col-span-6">
+                            <select name="cuenta[]" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500 focus:bg-white" required>
+                                <option value="">-- Cuenta --</option>
+                                {% for cuenta in cuentas %}
+                                <option value="{{ cuenta.id }}">{{ cuenta.codigo }} - {{ cuenta.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" name="debit[]" placeholder="Debe" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-mono text-right focus:outline-none focus:border-indigo-500 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" name="credit[]" placeholder="Haber" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-mono text-right focus:outline-none focus:border-indigo-500 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 space-y-2">
+                <button type="button" id="btn-add-row" class="w-full py-2 border border-dashed border-slate-300 rounded-lg text-xs font-semibold text-slate-500 hover:text-slate-800 hover:border-slate-400 hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Añadir Línea
+                </button>
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm shadow-indigo-100 transition-colors tracking-wide">
+                    Guardar Asiento Contable
+                </button>
+            </div>
+        </form>
+
+        <div class="lg:col-span-7 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Libro Diario Cronológico</h3>
+                <p class="text-xs text-slate-400">Historial de registros validados por el motor del sistema.</p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-left">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-6 w-1/4">Registro / Código</th>
+                            <th class="py-3 px-4 w-1/2">Estructura de Cuentas</th>
+                            <th class="py-3 px-6 w-1/4 text-right">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for asiento in asientos %}
+                            <tr class="bg-slate-50/40">
+                                <td class="py-4 px-6 valign-top">
+                                    <span class="text-xs font-bold text-slate-700 block">{{ asiento.fecha|date:"d M Y" }}</span>
+                                    <span class="inline-block mt-1 px-1.5 py-0.5 bg-slate-800 text-[9px] font-mono font-bold text-white rounded">Nro. {{ asiento.codigo }}</span>
+                                </td>
+                                <td colspan="2" class="py-4 px-4 text-xs font-bold text-indigo-950 align-middle">
+                                    {{ asiento.descripcion }}
+                                </td>
+                            </tr>
+                            
+                            {% for mov in asiento.detalles.all %}
+                                <tr class="hover:bg-slate-50/30 transition-colors group">
+                                    <td></td>
+                                    <td class="py-2.5 px-4 text-xs">
+                                        <div class="flex items-center {% if mov.haber > 0 %} pl-6 text-slate-400 {% else %} font-medium text-slate-700 {% endif %}">
+                                            <span>{{ mov.cuenta.codigo }} — {{ mov.cuenta.nombre }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2.5 px-6 text-right text-xs font-mono font-bold">
+                                        {% if mov.debe > 0 %}
+                                            <span class="text-emerald-600">+${{ mov.debe }}</span>
+                                        {% else %}
+                                            <span class="text-slate-600">${{ mov.haber }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            
+                            <tr class="h-2 bg-white"><td colspan="3"></td></tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-xs text-slate-400 py-12 font-medium">
+                                    <i data-lucide="inbox" class="w-8 h-8 mx-auto stroke-1 mb-2 text-slate-300"></i>
+                                    No se registran asientos en la base de datos local.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnAdd = document.getElementById('btn-add-row');
+    const contenedor = document.getElementById('contenedor-filas');
+    
+    btnAdd.addEventListener('click', function() {
+        const filas = document.querySelectorAll('.fila-movimiento');
+        const ultimaFila = filas[filas.length - 1];
+        const nuevaFila = ultimaFila.cloneNode(true);
+        nuevaFila.querySelectorAll('input').forEach(i => i.value = '');
+        nuevaFila.querySelector('select').selectedIndex = 0;
+        contenedor.appendChild(nuevaFila);
+        if(window.lucide) lucide.createIcons();
+    });
+});
+</script>
+{% endblock %}

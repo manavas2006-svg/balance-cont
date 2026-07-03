@@ -7,13 +7,11 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from .models import Cuenta, AsientoCabecera, AsientoDetalle
 from django.contrib.auth.models import User
-import re  # <-- Librería para validar texto con patrones
+import re 
 from .models import Perfil
 @login_required
 def libro_diario_view(request):
-    """
-    Vista para registrar y listar los asientos contables en el Libro Diario.
-    """
+  
     if request.method == 'POST':
         if not request.user.is_superuser and not request.user.is_staff:
             messages.error(request, "Acceso denegado: Su rol de Auditor solo le otorga permisos de lectura.")
@@ -94,9 +92,6 @@ def libro_diario_view(request):
 
 @login_required
 def plan_cuentas_view(request):
-    """
-    Vista del catálogo de cuentas: maneja la visualización y la creación de nuevas cuentas.
-    """
     if request.method == 'POST':
         if not request.user.is_superuser and not request.user.is_staff:
             messages.error(request, "Acceso denegado: Su rol de Auditor no le permite modificar la estructura del catálogo.")
@@ -140,9 +135,6 @@ def plan_cuentas_view(request):
 
 @login_required
 def api_balance_comprobacion(request):
-    """
-    API que calcula y sirve los saldos acumulados para el Balance de Comprobación (Lectura para todos).
-    """
     cuentas = Cuenta.objects.all().order_by('codigo')
     datos_balance = []
     
@@ -206,7 +198,6 @@ def gestion_usuarios_view(request):
             cedula = request.POST.get('cedula').strip().upper()
             rol = request.POST.get('rol')
             
-            # Validación de formato de Cédula Venezolana
             patron_cedula = r'^[VE]-[0-9]{6,8}$'
             if not re.match(patron_cedula, cedula):
                 messages.error(request, "Formato de Cédula inválido. Debe usar el formato V-12345678 o E-81234567.")
@@ -256,3 +247,4 @@ def gestion_usuarios_view(request):
         return redirect('gestion_usuarios')
     usuarios = User.objects.exclude(id=request.user.id).select_related('perfil').order_by('username')
     return render(request, 'contabilidad/usuarios.html', {'usuarios': usuarios})
+

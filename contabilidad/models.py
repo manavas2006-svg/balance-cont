@@ -25,7 +25,6 @@ class Cuenta(models.Model):
     def __str__(self):
         return f"{self.codigo} - {self.nombre}"
 
-
 class AsientoCabecera(models.Model):
     codigo = models.CharField(max_length=5, unique=True)
     fecha = models.DateField()
@@ -71,3 +70,5 @@ def verificar_o_crear_perfil(sender, instance, created, **kwargs):
             Perfil.objects.create(usuario=instance, cedula=f"V-TEMP-{instance.id}")
         except Exception:
             pass
+
+  
